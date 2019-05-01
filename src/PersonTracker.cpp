@@ -129,7 +129,7 @@ void PersonTracker::removeGroundPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr in_clo
   seg.setAxis(Eigen::Vector3f(0, 0, 1));
   seg.setEpsAngle(in_floor_max_angle);
 
-  seg.setDistanceThreshold(in_max_height);//floor distance
+  seg.setDistanceThreshold(in_max_height);
   seg.setOptimizeCoefficients(true);
   seg.setInputCloud(in_cloud_ptr);
   seg.segment(*inliers, *coefficients);
@@ -140,8 +140,22 @@ void PersonTracker::removeGroundPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr in_clo
   pcl::ExtractIndices<pcl::PointXYZ> extract;
   extract.setInputCloud(in_cloud_ptr);
   extract.setIndices(inliers);
-  extract.setNegative(true);//true removes the indices, false leaves only the indices
+  extract.setNegative(true);
   extract.filter(*out_cloud_ptr);
+}
+
+pcl::PointXYZ PersonTracker::getClosestPoint(pcl::PointXYZ& p, std::vector<pcl::PointXYZ>& points) {
+  auto min_distance = DBL_MAX;
+  double distance;
+  pcl::PointXYZ closest_point;
+  for (auto &i : points) {
+    distance = euclideanDistance(p, i);
+    if (distance < min_distance) {
+      closest_point = i;
+      min_distance = distance;
+    }
+  }
+  return closest_point;
 }
 
 void PersonTracker::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &cloud) {
@@ -164,31 +178,37 @@ void PersonTracker::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &cloud)
   marker_.points.clear();
   geometry_msgs::Point cp;
 
-  if (!start_tracking_)
-    ROS_INFO("Found %d objects!", (int) cluster_centroids.size());
-
   auto min_distance = DBL_MAX;
   double dist;
-  for (int i = 0; i < cluster_centroids.size(); i++) {
-    cp.x = cluster_centroids[i].x;
-    cp.y = cluster_centroids[i].y;
-    cp.z = cluster_centroids[i].z;
-    marker_.points.push_back(cp);
-    dist = euclideanDistance(cluster_centroids[i]);
-    if (dist < min_distance) {
-      object_position_ = cluster_centroids[i];
-      min_distance = dist;
-    }
-    if (!start_tracking_)
-      ROS_INFO("Object %d found at (%lf, %lf, %lf)", i + 1, cp.x, cp.y, cp.z);
-  }
 
-  marker_pub_.publish(marker_);
+  if (!start_tracking_) {
+    ROS_INFO("Found %d objects!", (int) cluster_centroids.size());
+    for (int i = 0; i < cluster_centroids.size(); i++) {
+      cp.x = cluster_centroids[i].x;
+      cp.y = cluster_centroids[i].y;
+      cp.z = cluster_centroids[i].z;
+      marker_.points.push_back(cp);
+      dist = euclideanDistance(cluster_centroids[i]);
+      if (dist < min_distance) {
+        object_position_ = cluster_centroids[i];
+        min_distance = dist;
+      }
+      ROS_INFO("Object %d found at (%lf, %lf, %lf)", i + 1, cp.x, cp.y, cp.z);
+    }
+    marker_pub_.publish(marker_);
+  }
 
   geometry_msgs::Twist move_cmd;
 
   if (start_tracking_) {
     if (!cluster_centroids.empty()) {
+      auto p = getClosestPoint(object_position_, cluster_centroids);
+      if (euclideanDistance(p, object_position_) > 1.0) {
+        ROS_WARN("Object being tracked was lost!");
+        cmd_pub_.publish(move_cmd);
+        return;
+      }
+      object_position_ = p;
       ROS_INFO("Tracking object at (%lf, %lf)", object_position_.x, object_position_.y);
       wp_marker_.pose.position.x = object_position_.x;
       wp_marker_.pose.position.y = object_position_.y;

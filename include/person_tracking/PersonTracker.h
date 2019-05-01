@@ -36,6 +36,7 @@ class PersonTracker {
                          pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud_ptr,
                          float in_max_height = 0.2,
                          float in_floor_max_angle = 0.1);
+  pcl::PointXYZ getClosestPoint(pcl::PointXYZ& p, std::vector<pcl::PointXYZ>& points);
 
  private:
   ros::NodeHandle nh_;
