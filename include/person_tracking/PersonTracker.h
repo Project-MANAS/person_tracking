@@ -56,10 +56,10 @@ class PersonTracker {
 
   double keep_points_upto_;
   double distance_to_maintain_;
-  double x_threshold_;
-  double y_threshold_;
-  double x_scale_;
-  double y_scale_;
+  double linear_threshold_;
+  double angular_threshold_;
+  double time_to_x_;
+  double time_to_angle_;
   double max_angular_speed_;
   double min_angular_speed_;
   double max_linear_speed_;
