@@ -4,10 +4,10 @@
         <param name="tracking_topic" value="/start_tracking"/>
         <param name="keep_points_upto" value="10.0"/>
         <param name="distance_to_maintain" value="1.0"/>
-        <param name="x_threshold" value="0.1"/>
-        <param name="y_threshold" value="0.1"/>
-        <param name="x_scale" value="1.0"/>
-        <param name="y_scale" value="2.5"/>
+        <param name="linear_threshold" value="0.1"/>
+        <param name="angular_threshold" value="0.1"/>
+        <param name="time_to_x" value="1.0"/>
+        <param name="time_to_angle" value="1.0"/>
         <param name="max_linear_speed" value="0.5"/>
         <param name="min_linear_speed" value="0.1"/>
         <param name="max_angular_speed" value="1.0"/>

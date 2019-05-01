@@ -33,19 +33,14 @@ PersonTracker::PersonTracker() : private_nh_("~") {
   private_nh_.param("distance_to_maintain", distance_to_maintain_, 1.5);
   private_nh_.param<std::string>("lidar_topic", lidar_topic_, "scan");
   private_nh_.param<std::string>("tracking_topic", tracking_topic_, "start_tracking");
-  private_nh_.param("x_threshold", x_threshold_, 0.1);
-  private_nh_.param("y_threshold", y_threshold_, 0.1);
-  private_nh_.param("x_scale", x_scale_, 1.0);
-  private_nh_.param("y_scale", y_scale_, 2.5);
+  private_nh_.param("linear_threshold", linear_threshold_, 0.1);
+  private_nh_.param("angular_threshold", angular_threshold_, 0.1);
   private_nh_.param("max_angular_speed", max_angular_speed_, 1.0);
   private_nh_.param("min_angular_speed", min_angular_speed_, 0.0);
   private_nh_.param("max_linear_speed", max_linear_speed_, 0.5);
   private_nh_.param("min_linear_speed", min_linear_speed_, 0.1);
-
-  ROS_INFO("lidar_topic: %s", lidar_topic_.c_str());
-  ROS_INFO("tracking_topic: %s", tracking_topic_.c_str());
-  ROS_INFO("keep_points_upto: %lf", keep_points_upto_);
-  ROS_INFO("distance_to_maintain: %lf", distance_to_maintain_);
+  private_nh_.param("time_to_x", time_to_x_, 1.0);
+  private_nh_.param("time_to_angle", time_to_angle_, 1.0);
 
   start_tracking_ = false;
 
@@ -216,10 +211,13 @@ void PersonTracker::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &cloud)
       wp_marker_.header = cloud->header;
       goal_pub_.publish(wp_marker_);
 
-      if ((abs(object_position_.x - distance_to_maintain_) > x_threshold_)
-          || (abs(object_position_.y) > y_threshold_)) {
-        auto linear_speed = (object_position_.x - distance_to_maintain_) * x_scale_;
-        auto angular_speed = -object_position_.y * y_scale_;
+      auto disp = euclideanDistance(object_position_);
+      auto theta = atan2(object_position_.y, object_position_.x);
+
+      if ((abs(disp - distance_to_maintain_) > linear_threshold_)
+          || (abs(theta) > angular_threshold_)) {
+        auto linear_speed = (disp - distance_to_maintain_) / time_to_x_;
+        auto angular_speed = theta / time_to_angle_;
 
         linear_speed = copysign(fmax(min_linear_speed_,
                                      fmin(max_linear_speed_, abs(linear_speed))), linear_speed);
