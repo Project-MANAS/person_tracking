@@ -18,6 +18,9 @@ Set the following parameters in `person_tracker.launch`:
   - `min_angular_speed (default: 0.0)`: Minimum angular speed for the robot
   - `time_to_x (default: 1.0)`: Time it would take to reach the goal if the max velocity permits. Used for scaling linear velocity.
   - `time_to_angle (default: 1.0)`: Time it would take to reach the goal if the max velocity permits. Used for scaling angular velocity.
+  - `clip_cloud (default: true)`: Clip the pointcloud to look for objects only in a specified angular range when tracking is off.
+  - `clip_angle_min (default: -1.31)`: Minimum clipping angle (radian)
+  - `clip_angle_max (default: 1.31)`: Maximum clipping angle (radian)
 
 To launch the person tracking node:
 ```bash

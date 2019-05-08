@@ -12,5 +12,8 @@
         <param name="min_linear_speed" value="0.1"/>
         <param name="max_angular_speed" value="1.0"/>
         <param name="min_angular_speed" value="0.0"/>
+        <param name="clip_cloud" value="true"/>
+        <param name="clip_angle_min" value="-1.31"/>
+        <param name="clip_angle_max" value="1.31"/>
     </node>
 </launch>

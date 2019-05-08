@@ -26,7 +26,6 @@
 
 #include <string>
 #include <vector>
-#include <stb.h>
 
 PersonTracker::PersonTracker() : private_nh_("~") {
   private_nh_.param("keep_points_upto", keep_points_upto_, 10.0);
@@ -41,6 +40,9 @@ PersonTracker::PersonTracker() : private_nh_("~") {
   private_nh_.param("min_linear_speed", min_linear_speed_, 0.1);
   private_nh_.param("time_to_x", time_to_x_, 1.0);
   private_nh_.param("time_to_angle", time_to_angle_, 1.0);
+  private_nh_.param("clip_cloud", clip_cloud_, true);
+  private_nh_.param("clip_angle_min", clip_angle_min_, -1.31);
+  private_nh_.param("clip_angle_max", clip_angle_max_, 1.31);
 
   start_tracking_ = false;
 
@@ -139,7 +141,7 @@ void PersonTracker::removeGroundPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr in_clo
   extract.filter(*out_cloud_ptr);
 }
 
-pcl::PointXYZ PersonTracker::getClosestPoint(pcl::PointXYZ& p, std::vector<pcl::PointXYZ>& points) {
+pcl::PointXYZ PersonTracker::getClosestPoint(pcl::PointXYZ &p, std::vector<pcl::PointXYZ> &points) {
   auto min_distance = DBL_MAX;
   double distance;
   pcl::PointXYZ closest_point;
@@ -165,7 +167,10 @@ void PersonTracker::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &cloud)
   else
     ground_filtered_ptr = cloud_ptr;
 
-  keepPointsUpTo(ground_filtered_ptr, filtered_ptr, keep_points_upto_);
+  if (clip_cloud_)
+    keepPointsUpTo(ground_filtered_ptr, filtered_ptr, keep_points_upto_, !start_tracking_);
+  else
+    keepPointsUpTo(ground_filtered_ptr, filtered_ptr, keep_points_upto_, false);
 
   auto cluster_centroids = getClusterCentroid(filtered_ptr);
 
@@ -239,9 +244,14 @@ void PersonTracker::trackingCallback(const std_msgs::Bool &msg) {
 }
 
 void PersonTracker::keepPointsUpTo(const pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
-                                   pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud_ptr, double distance) {
+                                   pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud_ptr, double distance, bool clipCloud) {
   out_cloud_ptr->points.clear();
   for (unsigned int i = 0; i < in_cloud_ptr->points.size(); i++) {
+    if (clipCloud) {
+      auto a = atan2(in_cloud_ptr->points[i].y, in_cloud_ptr->points[i].x);
+      if (a <= clip_angle_min_ || a >= clip_angle_max_)
+        continue;
+    }
     if (euclideanDistance(in_cloud_ptr->points[i]) < distance)
       out_cloud_ptr->points.push_back(in_cloud_ptr->points[i]);
   }

@@ -30,7 +30,7 @@ class PersonTracker {
 
   void keepPointsUpTo(pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
                       pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud_ptr,
-                      double distance);
+                      double distance, bool clipCloud);
   std::vector<pcl::PointXYZ> getClusterCentroid(pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr);
   void removeGroundPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr in_cloud_ptr,
                          pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud_ptr,
@@ -64,6 +64,9 @@ class PersonTracker {
   double min_angular_speed_;
   double max_linear_speed_;
   double min_linear_speed_;
+  double clip_angle_min_;
+  double clip_angle_max_;
+  bool clip_cloud_;
 
   std::string lidar_topic_;
   std::string tracking_topic_;
