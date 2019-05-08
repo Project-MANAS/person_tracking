@@ -32,6 +32,7 @@ PersonTracker::PersonTracker() : private_nh_("~") {
   private_nh_.param("distance_to_maintain", distance_to_maintain_, 1.5);
   private_nh_.param<std::string>("lidar_topic", lidar_topic_, "scan");
   private_nh_.param<std::string>("tracking_topic", tracking_topic_, "start_tracking");
+  private_nh_.param<std::string>("cmd_vel_topic", cmd_topic_, "cmd_vel");
   private_nh_.param("linear_threshold", linear_threshold_, 0.1);
   private_nh_.param("angular_threshold", angular_threshold_, 0.1);
   private_nh_.param("max_angular_speed", max_angular_speed_, 1.0);
@@ -72,7 +73,7 @@ PersonTracker::PersonTracker() : private_nh_("~") {
 
   marker_pub_ = nh_.advertise<visualization_msgs::Marker>("clusters", 1);
   goal_pub_ = nh_.advertise<visualization_msgs::Marker>("goal_wp", 1);
-  cmd_pub_ = nh_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+  cmd_pub_ = nh_.advertise<geometry_msgs::Twist>(cmd_topic_, 1);
 
   cloud_sub_ = nh_.subscribe(lidar_topic_, 1, &PersonTracker::cloudCallback, this);
   tracking_sub_ = nh_.subscribe(tracking_topic_, 1, &PersonTracker::trackingCallback, this);

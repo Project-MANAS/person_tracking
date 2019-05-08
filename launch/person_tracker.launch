@@ -2,6 +2,7 @@
     <node type="person_tracker" name="person_tracker" pkg="person_tracking" output="screen">
         <param name="lidar_topic" value="/scan"/>
         <param name="tracking_topic" value="/start_tracking"/>
+        <param name="cmd_vel_topic" value="/cmd_vel"/>
         <param name="keep_points_upto" value="10.0"/>
         <param name="distance_to_maintain" value="1.0"/>
         <param name="linear_threshold" value="0.1"/>

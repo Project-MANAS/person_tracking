@@ -8,6 +8,7 @@ The package is based on the 3D lidar and uses euclidean clustering and tracking 
 Set the following parameters in `person_tracker.launch`:
   - `lidar_topic (defualt: "/scan")`: Topic where lidar pointclouds are published (type: *sensor_msgs/PointCloud2*)
   - `tracking_topic (default: "/start_tracking")`: Topic where commands are published to start/stop tracking (type: *std_msgs/Bool*)
+  - `cmd_vel_topic (default: "/cmd_vel")`: Topic where velocity commands should be published (type: *geometry_msgs/Twist*)
   - `keep_points_upto (default: 10.0)`: Maximum distance around to bot in which obstacles should be searched
   - `distance_to_maintain (default: 1.0)`: Distance to maintain from the target at all times
   - `linear_threshold (default: 0.1)`: Minimum linear displacement from the target for bot to start moving

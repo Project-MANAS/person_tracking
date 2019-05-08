@@ -70,6 +70,7 @@ class PersonTracker {
 
   std::string lidar_topic_;
   std::string tracking_topic_;
+  std::string cmd_topic_;
 
   bool start_tracking_;
 
