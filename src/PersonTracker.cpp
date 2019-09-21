@@ -233,11 +233,11 @@ void PersonTracker::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &cloud)
         move_cmd.linear.x = linear_speed;
         move_cmd.angular.z = angular_speed;
       }
+      cmd_pub_.publish(move_cmd);
     } else
       ROS_INFO("No object to track!");
   }
 
-  cmd_pub_.publish(move_cmd);
 }
 
 void PersonTracker::trackingCallback(const std_msgs::Bool &msg) {

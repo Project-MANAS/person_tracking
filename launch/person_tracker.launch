@@ -1,6 +1,26 @@
 <launch>
+  <arg name="host" default="192.168.1.25"/>
+  <arg name="ns" default="Quanergy/Scan" />
+  <arg name="return" default="0" />
+  <arg name="maxCloudSize" default="-1" />
+
+  <!-- driver -->
+  <group ns="$(arg ns)">
+    <node name="client_node"
+          pkg="quanergy_client_ros"
+          type="client_node"
+          args="--host $(arg host) --settings $(find quanergy_client_ros)/settings/client.xml --frame $(arg ns) --return $(arg return) --max-cloud $(arg maxCloudSize)"
+          required="true"
+          output="screen"/>
+  </group>
+
+    <node name="radio_controller" pkg="radio_controller" type="radio_controller_node" output="screen" args="/dev/ttyUSB1 9600">
+        <rosparam command="load" file="$(find radio_controller)/cfg/radio_controller.yaml" />
+        <param name="pub_topic" value="/cmd_vel"/>
+    </node>
+
     <node type="person_tracker" name="person_tracker" pkg="person_tracking" output="screen">
-        <param name="lidar_topic" value="/scan"/>
+        <param name="lidar_topic" value="/Quanergy/Scan/points"/>
         <param name="tracking_topic" value="/start_tracking"/>
         <param name="cmd_vel_topic" value="/cmd_vel"/>
         <param name="keep_points_upto" value="10.0"/>
@@ -9,7 +29,7 @@
         <param name="angular_threshold" value="0.1"/>
         <param name="time_to_x" value="1.0"/>
         <param name="time_to_angle" value="1.0"/>
-        <param name="max_linear_speed" value="0.5"/>
+        <param name="max_linear_speed" value="1.0"/>
         <param name="min_linear_speed" value="0.1"/>
         <param name="max_angular_speed" value="1.0"/>
         <param name="min_angular_speed" value="0.0"/>
