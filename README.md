@@ -4,6 +4,10 @@ ROS package to detect and follow nearby objects.
 
 The package is based on the 3D lidar and uses euclidean clustering and tracking on pointclouds to find and follow the nearest object.
 
+
+![Demo](demo.gif)
+
+
 ### Usage
 Set the following parameters in `person_tracker.launch`:
   - `lidar_topic (defualt: "/scan")`: Topic where lidar pointclouds are published (type: *sensor_msgs/PointCloud2*)
